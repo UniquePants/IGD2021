@@ -108,7 +108,6 @@ public class PhaseHandler : MonoBehaviour
                 // equip new weapon for each player, one time for each ActionPhase
                 foreach (PlayerProperties player in players)
                 {
-                    print($"trying to access index {equippingPlayerIndex} of {havePlayersEquippedWeapons.Count}");
                     if (equippingPlayerIndex < havePlayersEquippedWeapons.Count && !havePlayersEquippedWeapons[equippingPlayerIndex])
                     {
                         ActionPhase actionPhase = player.GetComponent<ActionPhase>();

@@ -227,21 +227,21 @@ public class ActionPhase : MonoBehaviour
         }
     }
 
+    // throws the equipped weapon from activePlayer to targetPlayer
     IEnumerator ThrowWeapon(PlayerProperties activePlayer, PlayerProperties targetPlayer, Action onComplete)
     {
-        print("is back row; now throwing weapon");
+        print("now throwing weapon");
         GameObject throwableWeapon = SpawnNewWeapon(activePlayer.CurrentRowPosition, activePlayer.weapon);
 
-        // should get a rigidbody to be able to throw it, if not already available
-        if(throwableWeapon.GetComponent<Rigidbody>() != null)
-        {
-            throwableWeapon.AddComponent<Rigidbody>();
-        }
-        
+        // should get a rigidbody to be able to throw it
+        throwableWeapon.AddComponent<Rigidbody>();
         // following code is adapted from https://gist.github.com/marcelschmidt1337/e46d166b639c06af3ba896fcb8412be4
         float throwAngle = 45.0f;
         float gravity = 9.8f;
-        float targetDistance = Vector3.Distance(throwableWeapon.transform.position, targetPlayer.transform.position);
+        // TODO should land on the ground, not on the middle of the target character
+        Vector3 target = new Vector3(targetPlayer.transform.position.x, targetPlayer.transform.position.y, targetPlayer.transform.position.z);
+        print($"target: {target}, player position: {targetPlayer.transform.position}");
+        float targetDistance = Vector3.Distance(throwableWeapon.transform.position, target);
 
         // Calculate the velocity needed to throw the object to the target at specified angle
         float weaponVelocity = targetDistance / (Mathf.Sin(2 * throwAngle * Mathf.Deg2Rad) / gravity);
@@ -268,6 +268,7 @@ public class ActionPhase : MonoBehaviour
         {
             print("finished throwing weapon");
             onComplete.Invoke();
+            DestroyImmediate(throwableWeapon, true);
         }
     }
 
