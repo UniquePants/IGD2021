@@ -74,7 +74,7 @@ public class DecisionPhase : MonoBehaviour
     }
     #endregion
 
-
+    // TODO call from ActionPhase instead, this is a duplicate right now
     void RemoveLeftHandWeapon()
     {
         if (leftHandWeapon != null)

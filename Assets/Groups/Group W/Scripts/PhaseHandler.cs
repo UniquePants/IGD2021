@@ -16,7 +16,9 @@ public class PhaseHandler : MonoBehaviour
     public static List<PlayerProperties> players;
 
     public static int activePlayerIndex;
+    public static int equippingPlayerIndex;
     public bool isActionPhaseFinished;
+    public List<bool> havePlayersEquippedWeapons;
     public List<bool> arePlayerActionsOver;
 
     public enum Phase
@@ -58,10 +60,12 @@ public class PhaseHandler : MonoBehaviour
         {
             players.Add(child.GetComponent<PlayerProperties>());
             arePlayerActionsOver.Add(false);
+            havePlayersEquippedWeapons.Add(false);
         }
 
         // set the first player active
         activePlayerIndex = 0;
+        equippingPlayerIndex = 0;
     }
 
     // Update is called once per frame
@@ -95,25 +99,31 @@ public class PhaseHandler : MonoBehaviour
                 phase = Phase.Decision;
                 roundCount += 1;
                 activePlayerIndex = 0;
+                equippingPlayerIndex = 0;
                 arePlayerActionsOver = Enumerable.Repeat(false, players.Count).ToList();
+                havePlayersEquippedWeapons = Enumerable.Repeat(false, players.Count).ToList();
             }
             else
             {
-                // TODO it's sufficient to call this one time per round
-                // equip new weapon for each player
+                // equip new weapon for each player, one time for each ActionPhase
                 foreach (PlayerProperties player in players)
                 {
-                    ActionPhase actionPhase = player.GetComponent<ActionPhase>();
-                    actionPhase.ChangeLeftHandWeapon(player.rowPosition, player.weapon);
+                    print($"trying to access index {equippingPlayerIndex} of {havePlayersEquippedWeapons.Count}");
+                    if (equippingPlayerIndex < havePlayersEquippedWeapons.Count && !havePlayersEquippedWeapons[equippingPlayerIndex])
+                    {
+                        ActionPhase actionPhase = player.GetComponent<ActionPhase>();
+                        actionPhase.ChangeLeftHandWeapon(player.rowPosition, player.weapon);
+                        havePlayersEquippedWeapons[equippingPlayerIndex] = true;
+                        equippingPlayerIndex++;
+                    }
+
                 }
 
                 // each player attacks sequentially
                 // end if the last active player is finished
                 ActionPhase activePlayerActionPhase = players[activePlayerIndex].GetComponent<ActionPhase>();
 
-                bool isPlayerActionOver = arePlayerActionsOver[activePlayerIndex];
-
-                if (!isPlayerActionOver)
+                if (!arePlayerActionsOver[activePlayerIndex])
                 {
                     activePlayerActionPhase.DoAction();
                     arePlayerActionsOver[activePlayerIndex] = true;

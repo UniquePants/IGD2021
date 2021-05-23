@@ -80,4 +80,11 @@ public class PlayerProperties : MonoBehaviour
         leftHandPosition = transform.Find("Minifig Character/jointScaleOffset_grp/Joint_grp/detachSpine/spine01/spine02/spine03/spine04/spine05/spine06/shoulder_L/armUp_L/arm_L/wristTwist_L/wrist_L/hand_L/finger01_L").GetComponent<Transform>().position;
         healthStatus.fillAmount = (currentHp / maxHp);
     }
+
+    //Detect when there is a collision
+    void OnCollisionStay(Collision collide)
+    {
+        //Output the name of the GameObject you collide with
+        Debug.Log("I hit the GameObject : " + collide.gameObject.name);
+    }
 }

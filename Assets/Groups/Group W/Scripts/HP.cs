@@ -22,11 +22,15 @@ public class HP : MonoBehaviour
         {
             PlayerProperties player = matchingPlayers[0];
             hpTextMesh.text = $"{player.currentHp}/{player.maxHp}\n";
+            // only allow z position to change, others should always stay the same
+            // transform.position = new Vector3(player.startPosition.x, player.startPosition.y, player.transform.position.z);
         }
 
         else
         {
             print($"no matching players found for player name {playerName}. can not show hp.");
         }
+
+       
     }
 }

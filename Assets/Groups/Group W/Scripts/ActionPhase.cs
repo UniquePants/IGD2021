@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -92,7 +93,6 @@ public class ActionPhase : MonoBehaviour
             targetPosition.z += moveStopDistance;
         }
         
-        
         minifigController.MoveTo(targetPosition, onComplete: () => { MeleeAttack(activePlayer, targetPlayer); });
     }
 
@@ -171,7 +171,7 @@ public class ActionPhase : MonoBehaviour
         // TODO player hp should stay on top of player instead of rotating with him
         // TODO prevent player from being pushed around
         var rotationVector = player.transform.rotation.eulerAngles;
-        rotationVector.x = 90;
+        rotationVector.x = -90;
         player.transform.rotation = Quaternion.Euler(rotationVector);
 
         //float RotationSpeed = 2.0f;
@@ -180,20 +180,94 @@ public class ActionPhase : MonoBehaviour
         print($"player ({player.name}) is dead now");
     }
 
+    void RemoveLeftHandWeapon()
+    {
+        if (leftHandWeapon != null)
+        {
+            print("removed left hand weapon");
+            DestroyImmediate(leftHandWeapon, true);
+        }
+    }
+
     public void ChangeLeftHandWeapon(PhaseHandler.RowPosition rowPosition, WeaponDefinitions.WeaponType weaponType)
     {
-        // load a gameobject with the correct prefab
+        // to prevent any weapons from laying around after being thrown...does this make sense?
+        // alternative would be to spawn a new weapon and let any old ones where they are
+        // RemoveLeftHandWeapon();
+        Transform characterFingerPosition = player.transform.Find("Minifig Character/jointScaleOffset_grp/Joint_grp/detachSpine/spine01/spine02/spine03/spine04/spine05/spine06/shoulder_L/armUp_L/arm_L/wristTwist_L/wrist_L/hand_L/finger01_L").transform;
+        if (leftHandWeapon == null)
+        {
+            print("equipping new left hand weapon");
+            // spawns a new weapon and sets it as leftHandWeapon
+            leftHandWeapon = SpawnNewWeapon(rowPosition, weaponType);
+            leftHandWeapon.transform.parent = characterFingerPosition;
+        }
+    }
 
+    GameObject SpawnNewWeapon(PhaseHandler.RowPosition rowPosition, WeaponDefinitions.WeaponType weaponType)
+    {
+        // load a gameobject with the correct prefab
         Weapon[] matchingWeapons = WeaponDefinitions.GetWeapon(weaponType, rowPosition);
-        if (matchingWeapons.Length > 0 && leftHandWeapon == null)
+        GameObject newWeapon;
+
+        if (matchingWeapons.Length > 0)
         {
             string assetPath = matchingWeapons[0].asset;
             GameObject prefab = Resources.Load<GameObject>("Prefabs/" + assetPath) as GameObject;
-            leftHandWeapon = Instantiate(prefab, leftHandPosition, player.transform.rotation);
+            newWeapon = Instantiate(prefab, leftHandPosition, player.transform.rotation);
+            newWeapon.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            //newWeapon.layer = 8; // layer 8 should be "player", such that players won't collide with each other
+            //prefab.layer = 8;
+            return newWeapon;
+        }
+        else
+        {
+            // no matching weapon type was found
+            throw new InvalidOperationException();
+        }
+    }
 
-            // set the weapon as a child of left hand
-            leftHandWeapon.transform.parent = player.transform.Find("Minifig Character/jointScaleOffset_grp/Joint_grp/detachSpine/spine01/spine02/spine03/spine04/spine05/spine06/shoulder_L/armUp_L/arm_L/wristTwist_L/wrist_L/hand_L/finger01_L").transform;
-            leftHandWeapon.transform.localScale = new Vector3(1, 1, 1);
+    IEnumerator ThrowWeapon(PlayerProperties activePlayer, PlayerProperties targetPlayer, Action onComplete)
+    {
+        print("is back row; now throwing weapon");
+        GameObject throwableWeapon = SpawnNewWeapon(activePlayer.CurrentRowPosition, activePlayer.weapon);
+
+        // should get a rigidbody to be able to throw it, if not already available
+        if(throwableWeapon.GetComponent<Rigidbody>() != null)
+        {
+            throwableWeapon.AddComponent<Rigidbody>();
+        }
+        
+        // following code is adapted from https://gist.github.com/marcelschmidt1337/e46d166b639c06af3ba896fcb8412be4
+        float throwAngle = 45.0f;
+        float gravity = 9.8f;
+        float targetDistance = Vector3.Distance(throwableWeapon.transform.position, targetPlayer.transform.position);
+
+        // Calculate the velocity needed to throw the object to the target at specified angle
+        float weaponVelocity = targetDistance / (Mathf.Sin(2 * throwAngle * Mathf.Deg2Rad) / gravity);
+
+        // Extract the X & Y componenent of the velocity
+        float Vx = Mathf.Sqrt(weaponVelocity) * Mathf.Cos(throwAngle * Mathf.Deg2Rad);
+        float Vy = Mathf.Sqrt(weaponVelocity) * Mathf.Sin(throwAngle * Mathf.Deg2Rad);
+
+        // Calculate flight time.
+        float flightDuration = targetDistance / Vx;
+        print($"flight duration: {flightDuration}");
+
+        // remove the equipped weapon and throw the new one;
+        RemoveLeftHandWeapon();
+
+        float elapsedTime = 0;
+        while (elapsedTime < flightDuration)
+        {
+            throwableWeapon.transform.Translate(0, (Vy - (gravity * elapsedTime)) * Time.deltaTime, Vx * Time.deltaTime);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        if(elapsedTime >= flightDuration)
+        {
+            print("finished throwing weapon");
+            onComplete.Invoke();
         }
     }
 
@@ -206,28 +280,52 @@ public class ActionPhase : MonoBehaviour
 
     public void DoAction()
     {
-        // ChangeLeftHandWeapon(player.rowPosition, player.weapon);
         PlayerProperties targetPlayer = GetTargetPlayer(player.team, player.targetRow);
-
-        // if the preceding player is finished, its the next ones turn
-        // print($"current active player is {player.name}");
-
 
         // checks for restrictions before attacking
         if (CanPlayerAttack(player, targetPlayer))
         {
             // TODO check if player is front or back row to choose whether player should move or throw weapon
             // -> front should move and swing weapon, back should throw weapon
-            MoveToAttackTarget(player, targetPlayer);
+            if(player.CurrentRowPosition == PhaseHandler.RowPosition.Back)
+            {
+                Coroutine throwWeaponCoroutine = StartCoroutine(ThrowWeapon(player, targetPlayer, onComplete: () => {
+                    DealDamage(player, targetPlayer);
+                    PhaseHandler.SetNextActivePlayer();
+                }));
+            }
+
+            else
+            {
+                MoveToAttackTarget(player, targetPlayer);
+            }
         }
         else
         {
-            // TODO switch to next player
             print($"target ({targetPlayer.name}) can currently not be attacked. Switching to next player now.");
-            PhaseHandler.SetNextActivePlayer();
+            // somehow this has to be done via callback, otherwise the next phase won't be triggered
+            // PhaseHandler.SetNextActivePlayer();
+            // StartCoroutine(SetNextActivePlayer(onComplete: () => { PhaseHandler.SetNextActivePlayer(); }));
+
+            MinifigController.SpecialAnimation specialAnimation = player.currentHp <= 0 ? MinifigController.SpecialAnimation.LookingDown : MinifigController.SpecialAnimation.IdleImpatient;
+
+            var minifigController = player.GetComponent<MinifigController>();
+            minifigController.PlaySpecialAnimation(specialAnimation, onSpecialComplete: (x) => {
+                PhaseHandler.SetNextActivePlayer();
+            });
         }
 
     }
+
+    // this was just a test, can be deleted
+    IEnumerator SetNextActivePlayer(Action onComplete)
+    {
+        print("setting next active player from ActionPhase.cs");
+        // PhaseHandler.SetNextActivePlayer();
+        onComplete.Invoke();
+        yield return null;
+    }
+
 
     // Update is called once per frame
     void Update()
