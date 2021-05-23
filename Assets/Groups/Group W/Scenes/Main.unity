@@ -812,6 +812,11 @@ PrefabInstance:
       propertyPath: team
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3578296932868908729, guid: ef277551de3652c4dab21591da2a6201,
+        type: 3}
+      propertyPath: currentHp
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 5506935041737901320, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
       propertyPath: weaponTypesJsonFile

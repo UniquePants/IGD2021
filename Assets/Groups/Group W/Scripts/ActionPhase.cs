@@ -82,7 +82,7 @@ public class ActionPhase : MonoBehaviour
         Vector3 targetPosition = targetPlayer.transform.position;
 
         // stop *in front of* target character, not on top
-        // if activePlayer.z positive, -=; else +=
+        // if activePlayer.z positive, +=; else -=
         if (Math.Sign(activePlayer.transform.position.z) == -1)
         {
             targetPosition.z -= moveStopDistance;
@@ -96,13 +96,14 @@ public class ActionPhase : MonoBehaviour
         minifigController.MoveTo(targetPosition, onComplete: () => { MeleeAttack(activePlayer, targetPlayer); });
     }
 
-    bool IsPlayerAttackable(PlayerProperties activePlayer, PlayerProperties targetPlayer)
+    bool CanPlayerAttack(PlayerProperties activePlayer, PlayerProperties targetPlayer)
     {
         bool bothOnFrontRow = activePlayer.CurrentRowPosition == PhaseHandler.RowPosition.Front && targetPlayer.CurrentRowPosition == PhaseHandler.RowPosition.Front;
         bool activePlayerIsBackRow = activePlayer.CurrentRowPosition == PhaseHandler.RowPosition.Back;
         bool targetIsAlive = targetPlayer.currentHp > 0;
+        bool isPlayerAlive = activePlayer.currentHp > 0;
 
-        if (targetIsAlive)
+        if (targetIsAlive && isPlayerAlive)
         {
             return bothOnFrontRow || activePlayerIsBackRow;
         }
@@ -126,17 +127,19 @@ public class ActionPhase : MonoBehaviour
 
     void DealDamage(PlayerProperties activePlayer, PlayerProperties targetPlayer)
     {
+        print("now dealing damage");
         // calculate damage
         float damage = CalculateDamage(activePlayer, targetPlayer);
-        // lower hp of target
-        targetPlayer.currentHp -= damage;
-        if (targetPlayer.currentHp > 0)
+        // lower hp of target, but prevent hp from falling below 0
+        float newHp = targetPlayer.currentHp - damage;
+        targetPlayer.currentHp = newHp > 0 ? newHp : 0;
+        print($"damage to target ({targetPlayer.name}): {damage}. New HP: {targetPlayer.currentHp}");
+
+        if (targetPlayer.currentHp <= 0)
         {
-            print($"damage to target ({targetPlayer.name}): {damage}. New HP: {targetPlayer.currentHp}");
-            CheckForDeath(targetPlayer);
+            KillPlayer(targetPlayer);
         }
     }
-
 
     void ReturnToStartPosition(PlayerProperties activePlayer, PlayerProperties targetPlayer)
     {
@@ -155,15 +158,26 @@ public class ActionPhase : MonoBehaviour
         minifigController.TurnTo(originalRotation, onComplete: () => { PhaseHandler.SetNextActivePlayer(); });
     }
 
-    void CheckForDeath(PlayerProperties player)
+    // player will fall down to earth
+    void KillPlayer(PlayerProperties player)
     {
         var minifigController = player.GetComponent<MinifigController>();
-        if (player.currentHp <= 0)
-        {
-            // TODO player should die and not stand up anymore
-            minifigController.PlaySpecialAnimation(MinifigController.SpecialAnimation.Crawl);
-            print($"player ({player.name}) is dead now");
-        }
+        //minifigController.PlaySpecialAnimation(MinifigController.SpecialAnimation.Crawl);
+        //Invoke("minifigController.StopSpecialAnimation", 3.0f);
+        // wait x seconds, then .StopSpecialAnimation()
+        //minifigController.StopSpecialAnimation();
+
+        // TODO do this SLOWLY 
+        // TODO player hp should stay on top of player instead of rotating with him
+        // TODO prevent player from being pushed around
+        var rotationVector = player.transform.rotation.eulerAngles;
+        rotationVector.x = 90;
+        player.transform.rotation = Quaternion.Euler(rotationVector);
+
+        //float RotationSpeed = 2.0f;
+        //player.transform.Rotate(Vector3.up * (RotationSpeed * Time.deltaTime));
+
+        print($"player ({player.name}) is dead now");
     }
 
     public void ChangeLeftHandWeapon(PhaseHandler.RowPosition rowPosition, WeaponDefinitions.WeaponType weaponType)
@@ -200,7 +214,7 @@ public class ActionPhase : MonoBehaviour
 
 
         // checks for restrictions before attacking
-        if (IsPlayerAttackable(player, targetPlayer))
+        if (CanPlayerAttack(player, targetPlayer))
         {
             // TODO check if player is front or back row to choose whether player should move or throw weapon
             // -> front should move and swing weapon, back should throw weapon
@@ -208,7 +222,9 @@ public class ActionPhase : MonoBehaviour
         }
         else
         {
-            print($"target ({targetPlayer.name}) is not attackable.");
+            // TODO switch to next player
+            print($"target ({targetPlayer.name}) can currently not be attacked. Switching to next player now.");
+            PhaseHandler.SetNextActivePlayer();
         }
 
     }
