@@ -76,45 +76,65 @@ public class ActionPhase : MonoBehaviour
     }
 
     // moves to the target and attacks it
-    void AttackTarget(PlayerProperties activePlayer, PlayerProperties targetPlayer)
+    void MoveToAttackTarget(PlayerProperties activePlayer, PlayerProperties targetPlayer)
     {
         var minifigController = activePlayer.GetComponent<MinifigController>();
         Vector3 targetPosition = targetPlayer.transform.position;
+
         // stop *in front of* target character, not on top
-        targetPosition.z -= moveStopDistance;
-        minifigController.MoveTo(targetPosition, onComplete: () => { Attack(activePlayer, targetPlayer); });
+        // if activePlayer.z positive, -=; else +=
+        if (Math.Sign(activePlayer.transform.position.z) == -1)
+        {
+            targetPosition.z -= moveStopDistance;
+        }
+        else
+        {
+            targetPosition.z += moveStopDistance;
+        }
+        
+        
+        minifigController.MoveTo(targetPosition, onComplete: () => { MeleeAttack(activePlayer, targetPlayer); });
     }
 
-
-    void Attack(PlayerProperties activePlayer, PlayerProperties targetPlayer)
+    bool IsPlayerAttackable(PlayerProperties activePlayer, PlayerProperties targetPlayer)
     {
-        var minifigController = activePlayer.GetComponent<MinifigController>();
-        
-        // calculate damage
-        float damage = CalculateDamage(activePlayer, targetPlayer);
+        bool bothOnFrontRow = activePlayer.CurrentRowPosition == PhaseHandler.RowPosition.Front && targetPlayer.CurrentRowPosition == PhaseHandler.RowPosition.Front;
+        bool activePlayerIsBackRow = activePlayer.CurrentRowPosition == PhaseHandler.RowPosition.Back;
+        bool targetIsAlive = targetPlayer.currentHp > 0;
 
-        if(targetPlayer.currentHp >0)
+        if (targetIsAlive)
         {
-            // TODO play attack animation
-            // minifigController.PlaySpecialAnimation(MinifigController.SpecialAnimation.Stretching);
-
-            // lower hp of target
-            targetPlayer.currentHp -= damage;
-            if (targetPlayer.currentHp > 0)
-            {
-                print($"damage to target ({targetPlayer.name}): {damage}. New HP: {targetPlayer.currentHp}");
-                CheckForDeath(targetPlayer);
-            }
+            return bothOnFrontRow || activePlayerIsBackRow;
         }
 
         else
         {
-            print($"target ({targetPlayer.name}) is already dead");
+            return false;
         }
+    }
 
-        // finish attack
-        print("finished attack");
-        ReturnToStartPosition(activePlayer, targetPlayer);
+    // plays an attack animation, deals damage and returns to the start position
+    void MeleeAttack(PlayerProperties activePlayer, PlayerProperties targetPlayer)
+    {
+        var minifigController = activePlayer.GetComponent<MinifigController>();
+        minifigController.PlaySpecialAnimation(MinifigController.SpecialAnimation.HatSwap, onSpecialComplete: (x) => {
+            DealDamage(activePlayer, targetPlayer);
+            print("finished attack");
+            ReturnToStartPosition(activePlayer, targetPlayer);
+        });
+    }
+
+    void DealDamage(PlayerProperties activePlayer, PlayerProperties targetPlayer)
+    {
+        // calculate damage
+        float damage = CalculateDamage(activePlayer, targetPlayer);
+        // lower hp of target
+        targetPlayer.currentHp -= damage;
+        if (targetPlayer.currentHp > 0)
+        {
+            print($"damage to target ({targetPlayer.name}): {damage}. New HP: {targetPlayer.currentHp}");
+            CheckForDeath(targetPlayer);
+        }
     }
 
 
@@ -140,7 +160,6 @@ public class ActionPhase : MonoBehaviour
         var minifigController = player.GetComponent<MinifigController>();
         if (player.currentHp <= 0)
         {
-            // TODO prevent player from further being attacked
             // TODO player should die and not stand up anymore
             minifigController.PlaySpecialAnimation(MinifigController.SpecialAnimation.Crawl);
             print($"player ({player.name}) is dead now");
@@ -178,7 +197,20 @@ public class ActionPhase : MonoBehaviour
 
         // if the preceding player is finished, its the next ones turn
         // print($"current active player is {player.name}");
-        AttackTarget(player, targetPlayer);
+
+
+        // checks for restrictions before attacking
+        if (IsPlayerAttackable(player, targetPlayer))
+        {
+            // TODO check if player is front or back row to choose whether player should move or throw weapon
+            // -> front should move and swing weapon, back should throw weapon
+            MoveToAttackTarget(player, targetPlayer);
+        }
+        else
+        {
+            print($"target ({targetPlayer.name}) is not attackable.");
+        }
+
     }
 
     // Update is called once per frame
