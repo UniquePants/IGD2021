@@ -1561,17 +1561,17 @@ PrefabInstance:
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 9.758
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.187
+      value: 5.19
       objectReference: {fileID: 0}
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.238
+      value: -1.24
       objectReference: {fileID: 0}
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
@@ -1813,7 +1813,7 @@ GameObject:
   - component: {fileID: 261481642}
   - component: {fileID: 261481641}
   m_Layer: 0
-  m_Name: Cube (7)
+  m_Name: Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2885,7 +2885,7 @@ GameObject:
   - component: {fileID: 604551751}
   - component: {fileID: 604551750}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4032,7 +4032,7 @@ GameObject:
   - component: {fileID: 1019309305}
   - component: {fileID: 1019309304}
   m_Layer: 0
-  m_Name: Cube (6)
+  m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4590,7 +4590,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1124346913}
   m_Layer: 0
-  m_Name: Environment
+  m_Name: BaseEnvironment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5009,7 +5009,7 @@ GameObject:
   - component: {fileID: 1150563505}
   - component: {fileID: 1150563504}
   m_Layer: 0
-  m_Name: Main Camera (1)
+  m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6262,7 +6262,7 @@ PrefabInstance:
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 9.66
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
@@ -6533,7 +6533,7 @@ GameObject:
   - component: {fileID: 1300335630}
   - component: {fileID: 1300335629}
   m_Layer: 0
-  m_Name: Cube (8)
+  m_Name: Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7415,12 +7415,12 @@ PrefabInstance:
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.346
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.187
+      value: 5.19
       objectReference: {fileID: 0}
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
@@ -8798,6 +8798,7 @@ MonoBehaviour:
   secondsUntilActionPhase: 2
   secondsPassed: 0
   isActionPhaseFinished: 0
+  havePlayersEquippedWeapons: 
   arePlayerActionsOver: 
 --- !u!1001 &1612226045
 PrefabInstance:
@@ -9214,7 +9215,7 @@ GameObject:
   - component: {fileID: 1681614180}
   - component: {fileID: 1681614179}
   m_Layer: 0
-  m_Name: Cube (5)
+  m_Name: Front
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10695,7 +10696,7 @@ PrefabInstance:
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.646
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8612489488774388799, guid: ef277551de3652c4dab21591da2a6201,
         type: 3}
@@ -11637,7 +11638,7 @@ GameObject:
   - component: {fileID: 2135434170}
   - component: {fileID: 2135434169}
   m_Layer: 0
-  m_Name: Directional Light (1)
+  m_Name: Directional Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
