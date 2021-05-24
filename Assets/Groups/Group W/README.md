@@ -1,29 +1,21 @@
 Im Folgenden finden sich TODOs und DONEs.
 
 # TODOs
-## Kampfmodus
 
-### Angriffsanimation
-* Back: stehenbleiben, Fernkampfwaffe nutzen (z.B. Waffe werfen)
+## Integration mit Interconnections Gruppe
+## Spielende: Zeitablauf // alle besiegt --> Punkteverteilung
+## Custom Animationen
+	* Schlagen (für Nahkampfwaffe)
+	* Werfen (für Fernkampfwaffe)
+	* Sterben (langsam und qualvoll zu Boden fallen)
 
-### Beschränkung der Handlungsmöglichkeiten innerhalb Decision Phase
-* Target ist valide, wenn 
-	* front vs. front
-	* back vs. front 
-	* back vs. back
-	* hp > 0
-
-* Target ist invalide, wenn
-	* front vs. back
-	* hp <= 0
-
-* auch entsprechende Animation einblenden, wenn invalide Auswahl getroffen wird
-
-# Toter Spieler sollte auf dem Boden liegen und nicht mehr angegriffen werden können
+## Verschönerungen
+	* Anzeige "Weakness", "Neutral", "Resistence", wenn Charakter angegriffen wurde
+	* HP-Balken sollte sich zwar mit bewegen, wenn ein Charakter läuft, aber nicht, wenn er sich umdreht 
+		** evlt. PlayerProperties an MinifigCharakter statt PlayerMinifig XXXX anhängen
 
 ## KI Mitspieler
-## Tutorial?
-
+## Tutorial? Brauchen wir das?
 
 # DONEs Larissa
 * Scenes, Scripts Ordner in unserem Group W Ordner angelegt
@@ -66,6 +58,22 @@ Im Folgenden finden sich TODOs und DONEs.
 * Angriffsanimation
 	* Front: zu Gegner hinlaufen, angreifen (derzeit auch für Back)
 	* Update des HP-Balkens
+* Beschränkung der Handlungsmöglichkeiten innerhalb Decision Phase
+	* Target ist valide, wenn 
+		* front vs. front
+		* back vs. front 
+		* back vs. back
+		* && hp > 0
+
+	* Target ist invalide, wenn
+		* front vs. back
+		* hp <= 0
+
+	* Abspielen entsprechender Animation, wenn invalide Auswahl getroffen wird
+* Wenn Charakter tot: zu Boden fallen, liegen bleiben
+* Angriffsanimationen
+	* Back: stehenbleiben, Fernkampfwaffe nutzen (z.B. Waffe werfen)
+	* Front: zum Gegner hinlaufen
 
 # DONEs Polina
 * Methode/Funktion mit folgendem Verhalten:

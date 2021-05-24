@@ -149,6 +149,8 @@ public class ActionPhase : MonoBehaviour
 
     void RotateBack(PlayerProperties activePlayer, PlayerProperties targetPlayer)
     {
+        // TODO player hp should stay on top of player instead of rotating with him
+        // ... maybe attach PlayerProperties to MinifigCharacter insteadof Player Minifig XXXX
         // face to the correct direction again!(change rotation)
         print("now rotating back");
         var minifigController = activePlayer.GetComponent<MinifigController>();
@@ -158,24 +160,21 @@ public class ActionPhase : MonoBehaviour
         minifigController.TurnTo(originalRotation, onComplete: () => { PhaseHandler.SetNextActivePlayer(); });
     }
 
-    // player will fall down to earth
+    // player will fall down to ground
     void KillPlayer(PlayerProperties player)
     {
-        var minifigController = player.GetComponent<MinifigController>();
-        //minifigController.PlaySpecialAnimation(MinifigController.SpecialAnimation.Crawl);
-        //Invoke("minifigController.StopSpecialAnimation", 3.0f);
-        // wait x seconds, then .StopSpecialAnimation()
-        //minifigController.StopSpecialAnimation();
+        // only the minfig should fall down, not the attached components like the hp bar
+        GameObject minifigCharacter = player.GetComponent<MinifigController>().Minifig;
 
-        // TODO do this SLOWLY 
-        // TODO player hp should stay on top of player instead of rotating with him
+        // TODO do this SLOWLY, maybe create a dying animation
         // TODO prevent player from being pushed around
-        var rotationVector = player.transform.rotation.eulerAngles;
+        var rotationVector = minifigCharacter.transform.rotation.eulerAngles;
         rotationVector.x = -90;
-        player.transform.rotation = Quaternion.Euler(rotationVector);
+        minifigCharacter.transform.rotation = Quaternion.Euler(rotationVector);
 
-        //float RotationSpeed = 2.0f;
-        //player.transform.Rotate(Vector3.up * (RotationSpeed * Time.deltaTime));
+        //var rotationVector = player.transform.rotation.eulerAngles;
+        //rotationVector.x = -90;
+        //player.transform.rotation = Quaternion.Euler(rotationVector);
 
         print($"player ({player.name}) is dead now");
     }
